@@ -6,10 +6,11 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import relationship
 from flask_login import UserMixin, login_user, LoginManager, login_required, current_user, logout_user
-from forms import CreatePostForm, RegisterForm, LoginForm, CommentForm
+from forms import CreatePostForm, RegisterForm, LoginForm, CommentForm, ContactForm
 from flask_gravatar import Gravatar
 from functools import wraps
 from flask import abort
+import smtplib
 
 app = Flask(__name__)
 
@@ -181,9 +182,24 @@ def about():
     return render_template("about.html")
 
 
-@app.route("/contact")
+@app.route("/contact", methods=['GET', 'POST'])
 def contact():
-    return render_template("contact.html")
+    contact_form = ContactForm()
+    if contact_form.validate_on_submit():
+        print("hello")
+        name = contact_form.name.data
+        email = contact_form.email.data
+        phone = contact_form.phone.data
+        message = contact_form.message.data
+        my_email = "tahastest@gmail.com"
+        password = "yobucffjltycintp"
+        with smtplib.SMTP("smtp.gmail.com", 587) as connection:
+            connection.starttls()
+            connection.login(user=my_email, password=password)
+            connection.sendmail(from_addr=my_email, to_addrs=email,
+                                msg=f"Subject:New Entry Received\n\nName: {name}\nPhone: {phone}\nMessage: {message}")
+            return render_template("contact.html", sent=True, form=contact_form)
+    return render_template("contact.html", form=contact_form)
 
 
 @app.route("/new-post", methods=['GET', 'POST'])

@@ -1,6 +1,6 @@
 def calc(**kwargs):
     print(kwargs)
-    if kwargs['add']==3:
+    if kwargs['add'] == 3:
         print("hello")
 
 
